@@ -15,3 +15,6 @@ print("Number of Items  : ", len(myNumbers))
 for element in myNumbers:
     position = myNumbers.index(element)  # get position of the element
     print(position, element)
+
+
+priny
