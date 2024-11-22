@@ -1,24 +1,53 @@
-validDigits = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, "."]
+#------------------------------------------------------
 
-thestring = input("Enter numbers: ")
+# Vending Machine
 
-validinput = True
+#----------------------------------------------------
+ 
+drinksMenu = [ "Coffee", 3.5, "Tea   ", 2.0, "Hot Choc", 3.0, "Hot Milk", 4.0 ]
+ 
+# print the drinks' menu
 
-for character in thestring:
-    if character in validDigits:
-        validinput = True
+def printMenu():
+ 
+    print(20 * "-")
+ 
+    for index in range(0, len(drinksMenu), 2):      # range(start, stop , step)
+ 
+        drinkName = drinksMenu[index]
 
-    else:
-        validinput = False
-        print("Invalid Character Detected")
-        break
+        drinkPrice= drinksMenu[index + 1]
 
-print(f"Input was {validinput}")
+        print(f" {int(index/2 + 1)} {drinkName} \t\t {drinkPrice}" )
 
+    print(20 * "-")
+ 
+ 
+ 
+# get the user to enter their drink selection
 
-mynumber = int(input())
+def enterChoice():
+ 
+    userChoice = int(input("please make your selection: "))
 
-if mynumber is int:
-    print("valid input")
-else:
-    print("invalid input")
+    # validate user's choice, etc
+
+ 
+ 
+#----------------------------------------
+
+#       Main Processing Control starts Here
+
+#-----------------------------------------
+ 
+# print the drinks' menu
+
+printMenu()
+ 
+# get user's selection
+
+enterChoice()
+ 
+    
+ 
+ 
