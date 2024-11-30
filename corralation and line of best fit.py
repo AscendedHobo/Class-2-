@@ -18,18 +18,25 @@ y = frame["Ice_Cream_Sales"]
 #frame.plot(x,y , kind="scatter")
 frame.plot(x="Temperature", y="Ice_Cream_Sales", kind="scatter")
 
+
 slope_intercept = np.polyfit(x,y,1)
+
+
+slope = round(slope_intercept[0])
+
+intercept = round(slope_intercept[1])
+
+
+
 print(f'slope :{round(slope_intercept[0])}, intercept : {round(slope_intercept[1])}')
 cor = (np.corrcoef(x,y))
-print(type(cor))
-
-slope = {round(slope_intercept[0])} 
-
-intercept = {round(slope_intercept[1])}
-
-plt.plot((slope*x)+intercept)
-
 print(np.corrcoef(x,y))
+cor = np.corrcoef(x, y)[0, 1]  # Extract the correlation coefficient
+print(f'Correlation coefficient: {cor:.2f}')
+
+plt.plot(x,(slope*x)+intercept)
+
+
 
 plt.show()
 
