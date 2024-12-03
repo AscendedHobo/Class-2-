@@ -25,9 +25,12 @@ print("_" * 60)
 # for i in range(len(randomword)):
 #         underscorelist = underscorelist.append("_")
 
+#create a list of invidual "_"  the lenght of the 
 underscorelist = list("_" * len(randomword))
 
 
+
+# create a list of indivdual charaters
 charalist = []
 
 for i in range (0,len(randomword)):
@@ -43,16 +46,17 @@ trylist = []
 
 print(underscorelist)
 
-while trycount < 15 and listcomplete == False: 
+while trycount < 11 and listcomplete == False: 
     print(f"{underscorelist}")
     userinput = input("Enter a letter or attempt a whole word guess :" )
-    trycount += 1
-
+    
                      
     if userinput == randomword:
         print("You got the word")
         listcomplete = True
+        print(charalist)
         print(f"You got the word in {trycount} guesses!")
+        break
 
 
     if userinput in charalist:
@@ -64,13 +68,20 @@ while trycount < 15 and listcomplete == False:
 
     if userinput in charalist:
         print(f"{userinput} is a correct guess!")
+        print(f"You have  {trycount} incorrect guess ")
     else:
         print(f"{userinput} is a incorrect guess!")
         trylist.append(userinput)
-    print(f"Not in  {trylist}")
-    print(f"You have guessed {trycount} times limit reached ")
+        trycount += 1
+        print(f"Not in  {trylist}")
+        print(f"You have  {trycount} incorrect guess ")
 
     if underscorelist == charalist:
         print("You got the word!!")
         print(f"You got the word in {trycount} guesses!")
         listcomplete =  True
+
+    if trycount == 11:
+        print("Max attempts reached")
+        print(f"the word was : {charalist}")
+
