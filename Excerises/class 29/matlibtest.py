@@ -11,7 +11,7 @@ the list.
 
 import  random
 import numpy as np
-import matplotlib as mp
+import matplotlib.pyplot as mp
 
 
 
@@ -39,7 +39,17 @@ mean = total / (len(freqencylist) / 2)
 
 
 print(mean)
+x = []
+y=[]
+for i in range(0,(len(freqencylist)-1), 2):
+    x.append(freqencylist[i])
+    y.append(freqencylist[i+1])
+    
+
+print(x)
+print(y)
 
 
+mp.plot(x,y,)
 
-
+mp.show()

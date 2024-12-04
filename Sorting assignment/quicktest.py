@@ -1,6 +1,6 @@
 import random
 
-# Function to generate a list of random numbers
+# Function to generate a list of random numbers, the length based on user input
 def createlist(n_number):
     for i in range(0,n_number):                       ## range / length of the list from 0 to user input
         number_list.append(random.randint(0,1000))    # Random int appended to the list
