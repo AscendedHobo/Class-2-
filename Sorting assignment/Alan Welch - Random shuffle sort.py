@@ -1,18 +1,9 @@
 import random
 
-import code2flow
-
-input_files = ['C:/Users/alanw/Documents/GitHub/Class/bogo.py']
-output_file = 'C:/Users/alanw/Desktop/bogo_graph.dot'
-
-
-code2flow.code2flow(input_files, output_file)
-
-
 numberlist = [8,6,9,7]
 
 random.shuffle(numberlist)
-import code2flow
+
 
 sorted  = False
 

@@ -11,45 +11,50 @@ the list.
 
 import  random
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as mp
 
-
-
+############################################################################################
+##create random number list
 numlist = []
 
-for i in range(0,10):
+for i in range(0,1000):
     numlist.append(random.randint(1, 20))
 
+numlist.sort
+############################################################################################
 
-print(numlist)
+#convert random list into list with the counted frequency next to it
 
 freqencylist = []
-
 for i in numlist:
     freqencylist.append(i)
     freqencylist.append(numlist.count(i))
 
-print(freqencylist)
-
+############################################################################################
+# working out the mean
 total = 0
 for i in (freqencylist[::2]):
     total = total + i
 
 mean = total / (len(freqencylist) / 2)
 
-
 print(mean)
-x = []
-y=[]
+############################################################################################
+#Separating the one list into two lists
+numlist = []
+freqlist =[]
 for i in range(0,(len(freqencylist)-1), 2):
-    x.append(freqencylist[i])
-    y.append(freqencylist[i+1])
+    if i not in freqencylist:
+        numlist.append(freqencylist[i])
+        freqlist.append(freqencylist[i+1])
     
+############################################################################################
+# ploting the graph
 
-print(x)
-print(y)
-
-
-mp.plot(x,y,)
-
+mp.bar(numlist, freqlist)
+mp.xlabel("Number")
+mp.ylabel("Frequency")
 mp.show()
+
+############################################################################################

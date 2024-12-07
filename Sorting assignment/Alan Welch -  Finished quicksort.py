@@ -1,3 +1,15 @@
+
+'''
+Program takes a int from the user to create a list of random numbers from  0,1000    for range 0 , userinput.
+
+Uses a quicksort / pivot method of sorting  
+
+Uses recursion to call lists > or < pivot. which then combines them into a sorted list 
+
+
+'''
+
+
 import random
 
 # Function to generate a list of random numbers, the length based on user input
@@ -25,7 +37,7 @@ def choose_pivot(number_list):
 
 
 # QuickSort implementation
-def quicksort(number_list):
+def quicksort(number_list): 
     # Base case: list with one or zero elements is already sorted
     if len(number_list) <= 1:
         return number_list
@@ -33,17 +45,16 @@ def quicksort(number_list):
     # Choose a pivot
     pivot = choose_pivot(number_list)
     
-    # Partition the list into two sublists: less than pivot and greater than pivot
-    # left = [x for x in number_list if x < pivot]
-    # right = [x for x in number_list if x > pivot]
-    # middle = [x for x in number_list if x == pivot]
+   
 
-    # Initialize empty lists for left, right, and middle partitions
+    #  empty lists for left, right, and middle / same as pivot 
     left = []
     right = []
     middle = []
 
     # Loop through the number_list and assign values to left, right, or middle
+    
+    
     for x in number_list:
         if x < pivot:
             left.append(x)     # Add to left if x is less than pivot
@@ -56,9 +67,9 @@ def quicksort(number_list):
     # Recursively sort the left and right sublists and concatenate them with the middle
     return quicksort(left) + middle + quicksort(right)
 
-# Main function to run the quicksort
 
-# Create a random list of numbers
+
+############ Main processing ###########################################
 
 n_number = int(input("Insert list of numbers to be generated : "))    ## variable for length of list
 

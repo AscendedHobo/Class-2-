@@ -54,22 +54,55 @@
 # 3. Print the union and intersection of the seasons and academic sets.
 
 
-spring = {"March", "April", "May"}
-summer = {"June", "July", "August"}
-autumn = {"September", "October", "November"}
-winter = {"December", "January", "February"}
+# spring = {"March", "April", "May"}
+# summer = {"June", "July", "August"}
+# autumn = {"September", "October", "November"}
+# winter = {"December", "January", "February"}
 
-academic_months = {"September", "October", "November", "December", "January", "February", "March", "April", "May", "June"}
+# academic_months = {"September", "October", "November", "December", "January", "February", "March", "April", "May", "June"}
 
-autumninter  = autumn & academic_months
-winterinter  = winter & academic_months
-summerinter =  summer & academic_months
-springinter  = spring & academic_months
+# autumninter  = autumn & academic_months
+# winterinter  = winter & academic_months
+# summerinter =  summer & academic_months
+# springinter  = spring & academic_months
 
-print(f"spring intersections {springinter} \n summer intersection {summerinter} \n autumn intersection {autumninter}\n winter intersection {winterinter}")
+# print(f"spring intersections {springinter} \n summer intersection {summerinter} \n autumn intersection {autumninter}\n winter intersection {winterinter}")
 
-# #############################################################################################################################
+# # #############################################################################################################################
 
+# Consider the maths and English sets shown. Using Python answer the following.
+
+# 1. How many students are there in total?
+# 2. Which students took both maths and English?
+# 3. Which students took maths only?
+# 4. Which students took English only?
+
+maths = {"Mark", "Jane", "Patrick", "Jenny", "Rahoul"}
+english = {"Rahoul", "Jane", "Simon", "Amber", "Patrick", "Jo", "Shelly"}
+
+print(f"Maths students : {maths}")
+print(f"English students : {english}")
+# 1. How many students are there in total?
+print(f"The total number of students are {len( maths | english)}")
+
+# 2. Which students took both maths and English?
+print(f"The students that took maths and english are  {maths & english}")
+
+# 3. Which students took maths only?
+print(f"The students that took maths but not english   {maths - english}")
+
+# 4. Which students took English only?
+print(f"The students that took maths but not english   {english - maths}")
+
+##########################################################################################################
+
+
+
+
+
+
+
+#notes while learning  
 
 # fruits = set(("apple", "banana", "pear", "tomato"))
 # # print(fruits)
