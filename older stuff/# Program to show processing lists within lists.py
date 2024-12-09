@@ -19,6 +19,12 @@ grades = [   ["Mark  ", 23,45,43,67,78],
              ["Maggie", 45,65,45,67,34 ]
  
           ]
+
+list = ["Maggie", 45,65,45,67,34 ]
+
+
+        
+
  
 def printScores():
  
