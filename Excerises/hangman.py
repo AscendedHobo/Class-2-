@@ -36,7 +36,7 @@ charalist = []
 for i in range (0,len(randomword)):
     charalist.append(randomword[i])
 
-print(charalist)
+# print(charalist)
 
 trycount = 0 
 
