@@ -18,10 +18,10 @@
 # print(round(prob * 100,2))
 
 #######################################################################################################################
-from scipy.stats import norm
-mean = 1120
-sd = 140
-upper_prob = norm(loc = mean, scale = sd).cdf(1250)
-lower_prob = norm(loc = mean, scale = sd).cdf(1100)
-prob = upper_prob - lower_prob
-print(round(prob * 100,2))
+# from scipy.stats import norm
+# mean = 1120
+# sd = 140
+# upper_prob = norm(loc = mean, scale = sd).cdf(1250)
+# lower_prob = norm(loc = mean, scale = sd).cdf(1100)
+# prob = upper_prob - lower_prob
+# print(round(prob * 100,2))
