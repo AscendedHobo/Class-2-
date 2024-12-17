@@ -17,7 +17,7 @@ gold_positions = [
     (1577, 1395), (1630, 1401)
 ]
 
-def get_rgb_at_position(x, y): 
+def get_rgb_at_position(x, y):
     return pyautogui.screenshot(region=(x, y, 1, 1)).getpixel((0, 0))
 
 def is_gold_color(rgb, tolerance=30):
@@ -72,6 +72,8 @@ def check_images_in_regions(image_paths, regions):
 
 # Play selection logic
 def select_best_play(minis_in_hand, gold_count):
+    # If gold is 5 or more, play Troll or Ranger if available
+
     if gold_count >= 4:
         if "Emp 4" in minis_in_hand:
             return "Emp 4"
@@ -82,40 +84,49 @@ def select_best_play(minis_in_hand, gold_count):
         elif "Troll 3" in minis_in_hand:
             return "Troll 3"
     
+    # If gold is less than 5 and we don't have enough to play Troll or Ranger, don't play anything
     elif gold_count < 5:
-        if "Ranger 5" in minis_in_hand or "Troll 3" in minis_in_hand or "Emp 4" in minis_in_hand:
+        if "Ranger 5 " in minis_in_hand or "Troll 3 " or "Emp 4" in minis_in_hand:
             return None  # Don't play anything until gold is sufficient
     
+
+    # If gold is 7 or more, play the cheapest cost minion in hand
     if gold_count >= 6:
+        # Extract the cost from each minion name (assumes format like 'Ranger 5', 'Troll 3')
         minion_costs = [(minion, int(minion.split()[-1])) for minion in minis_in_hand]
+        # Sort the list by cost
         minion_costs.sort(key=lambda x: x[1])
+        # Select the cheapest minion
         if minion_costs:
             return minion_costs[0][0]  # Return the minion name of the cheapest one
+
+
+    # # If gold is 8 or more and we don't have Troll or Ranger, play anything, preferably Emp
+    # if gold_count >= 8:
+    #     if "Emp 4" in minis_in_hand:
+    #         return "Emp 4"
+    #     else:
+    #         return minis_in_hand[0]  # Play the first available minion if Emp is not available
     
     return None  # No valid play
 
 # Clicking logic for selecting a minion to play
 def click_minion_and_map(selected_minion, minis_in_hand):
     if selected_minion:
+        # Find the region where the selected minion is located
         selected_region = next(region for minion, region in zip(minis_in_hand, regions) if minion == selected_minion)
 
+        # Click on the region where the minion is located
         region_center_x = selected_region[0] + selected_region[2] // 2
         region_center_y = selected_region[1] + selected_region[3] // 2
         pyautogui.click(region_center_x, region_center_y)
 
+        # Now click on one of the three predefined map positions
         map_positions = [(1475, 945), (1265, 778), (1037, 940)]
         selected_map_pos = random.choice(map_positions)
         pyautogui.click(selected_map_pos)
     else:
         print("No valid minion to play.")
-
-# Image search for finding button images
-def find_image(image_path, confidence=0.9):
-    try:
-        result = pyautogui.locateOnScreen(image_path, confidence=confidence)
-        return result is not None
-    except Exception:
-        return False
 
 # GUI with Tkinter
 class BotGUI(tk.Tk):
@@ -125,18 +136,22 @@ class BotGUI(tk.Tk):
         self.geometry("600x400")
         self.is_running = False
 
+        # Textbox to display log output
         self.log_output = tk.Text(self, wrap=tk.WORD, height=15, width=60)
         self.log_output.pack(padx=10, pady=10)
 
+        # Add a label for current hand and gold count
         self.current_hand_label = tk.Label(self, text="Current hand: ")
         self.current_hand_label.pack()
 
         self.current_gold_label = tk.Label(self, text="Current gold: ")
         self.current_gold_label.pack()
 
+        # Start/Stop Button
         self.toggle_button = tk.Button(self, text="Start Bot", command=self.toggle_bot)
         self.toggle_button.pack(pady=10)
 
+        # Bind the 'Q' key to start/stop bot
         self.bind("<q>", self.toggle_bot)
 
     def toggle_bot(self, event=None):
@@ -154,55 +169,44 @@ class BotGUI(tk.Tk):
     def run_bot(self):
         try:
             while self.is_running:
-                # Check for the "battle started" image
-                battle_started = find_image(
-                    r"C:\Users\alanw\Documents\GitHub\Class\Automation tools\Reference folders\Rumble pvp menu management\region_910x1349_87x61 battle started.png")
-                if not battle_started:
-                    time.sleep(1)  # Delay before trying again
-                    continue  # Wait until battle started is detected
+                gold_count = count_gold()
+                minis_in_hand = check_images_in_regions(image_paths, regions)
 
-                self.log_output.insert(tk.END, "Battle Started\n")
-                self.log_output.yview(tk.END)
+                # Update the GUI with current hand and gold amount
+                self.update_gui(minis_in_hand, gold_count)
 
-                # Run the bot during the battle
-                while self.is_running:
-                    gold_count = count_gold()
-                    minis_in_hand = check_images_in_regions(image_paths, regions)
-                    selected_minion = select_best_play(minis_in_hand, gold_count)
+                # Select the best play based on the current gold and minions in hand
+                selected_minion = select_best_play(minis_in_hand, gold_count)
 
-                    if selected_minion:
-                        self.log_output.insert(tk.END, f"Selected play: {selected_minion}\n")
-                        self.log_output.yview(tk.END)
+                # Output the selected play to GUI
+                if selected_minion:
+                    self.log_output.insert(tk.END, f"Selected play: {selected_minion}\n")
+                    self.log_output.yview(tk.END)
 
-                        click_minion_and_map(selected_minion, minis_in_hand)
-                        time.sleep(2)
+                # Click to play the selected minion and map position
+                click_minion_and_map(selected_minion, minis_in_hand)
 
-                    # Check for battle end less frequently (every 10 seconds)
-                    battle_ended = None
-                    for _ in range(10):
-                        battle_ended = find_image(
-                            r"C:\Users\alanw\Documents\GitHub\Class\Automation tools\Reference folders\Rumble pvp menu management\region_1151x1276_242x67 battle ended.png")
-                        if battle_ended:
-                            break
-                        time.sleep(1)  # Wait for 1 second before checking again
-
-                    # If battle ended, exit the loop and stop the bot
-                    if battle_ended:
-                        self.log_output.insert(tk.END, "Battle Ended\n")
-                        self.log_output.yview(tk.END)
-                        self.is_running = False  # Stop bot after battle ends
-                        break  # Exit the battle loop
-
-                    time.sleep(2)  # Wait before checking again for another round
+                time.sleep(2)  # Wait before checking again
 
         except Exception as e:
             self.log_output.insert(tk.END, f"Error: {str(e)}\n")
             self.log_output.yview(tk.END)
 
     def update_gui(self, minis_in_hand, gold_count):
+        # Update the current hand and gold labels
         self.current_hand_label.config(text=f"Current hand: {', '.join(minis_in_hand)}")
         self.current_gold_label.config(text=f"Current gold: {gold_count}")
 
+# Run the GUI
 if __name__ == "__main__":
     app = BotGUI()
     app.mainloop()
+
+
+
+
+
+
+
+
+### menu tracking 

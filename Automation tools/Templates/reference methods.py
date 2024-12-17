@@ -21,6 +21,15 @@ input("Press Enter to close the browser...")
 
 # # Import the relevant modules
 
+#check for image somewhere on screen, optional, in a region? . greyscale for speed,  confidence for differences
+pyautogui.locateOnScreen('stickman.png', region=(150,175,350,600), grayscale=True, confidence=0.8) 
+#
+
+# mouse postion and rgb vaules in one line
+pyautogui.displayMousePosition()
+
+#check only for R or G or B vaule, as 0 1 2 in []
+if pyautogui.pixel(581, 400)[0] == 0:
 
 # # Give the python file some time before continuing
 # time.sleep(3)
