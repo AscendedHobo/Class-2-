@@ -1,0 +1,25 @@
+<style>
+
+/* 
+Box model
+
+Padding =  the space between boarders 
+Margin = the space betwen a border and the box edge
+Border = edge within the tag
+Margin = the space betwen a border and the box edge
+Box edge = outermost edge of a given tag
+
+
+ */
+footer {background-color: aqua;
+}
+
+
+h1 {
+background-color: blueviolet;
+background-image: url(assets/images/images.jpg);
+
+color: brown;
+font-style: italic;
+}
+</style>

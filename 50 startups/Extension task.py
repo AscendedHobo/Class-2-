@@ -9,7 +9,7 @@ from sklearn.metrics import r2_score
 from mpl_toolkits.mplot3d import Axes3D
 from sklearn.preprocessing import PolynomialFeatures
 
-df = pd.read_csv(r"C:\Users\alanw\Documents\GitHub\Class\50 startups\50_Startups.csv")
+df = pd.read_csv(r"C:\Users\alanw\OneDrive\Documents\GitHub\Class\50 startups\50_Startups.csv")
 
 # Separate the data by states
 ny_data = df[df['State'] == 'New York']

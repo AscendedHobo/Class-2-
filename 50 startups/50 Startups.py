@@ -12,7 +12,7 @@ from sklearn.preprocessing import PolynomialFeatures
 
 
 # Load the dataset
-df = pd.read_csv(r"C:\Users\alanw\Documents\GitHub\Class\50 startups\50_Startups.csv")
+df = pd.read_csv(r"C:\Users\alanw\OneDrive\Documents\GitHub\Class\50 startups\50_Startups.csv")
 
 
 
