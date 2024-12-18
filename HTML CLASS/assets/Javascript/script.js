@@ -12,14 +12,26 @@
 // console.log("hello world")
 
 
-let x = 20; 
-let y = 20;
-let mylist = ["John", "Alan", "Jacob"];
+// let x = 20; 
+// let y = 20;
+// let mylist = ["John ", "Alan ", "Jacob"];
 
-for (let i = 0; i < mylist.length; i++) {
-    console.log(mylist[i]);
+
+let name = prompt("enter a number");
+
+name = Number(name);
+
+for (let i = 1; i <=  10 ; i++) {
+    let multiplication = i * name
+    console.log(multiplication);
+    // document.write(mylist[i]);
 }
 
-console.log(x * y);
+// // window.alert("hide and....");
 
-console.log("hello world");
+// document.write("correct answer is seek, you wrote" + name)
+// console.log(x * y);
+
+// input = 
+
+// console.log("hello world");
