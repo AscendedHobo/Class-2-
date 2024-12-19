@@ -50,12 +50,12 @@ def update(frame):
         # Clear and update the 3D plot
         ax.clear()
         
-        # Plot the Earth (scaled sphere)
-        u, v = np.mgrid[0:2*np.pi:100j, 0:np.pi:50j]
-        earth_x = 3185 * np.cos(u) * np.sin(v)  # Adjusted radius for Earth
-        earth_y = 3185 * np.sin(u) * np.sin(v)
-        earth_z = 3185 * np.cos(v)
-        ax.plot_surface(earth_x, earth_y, earth_z, color="blue", alpha=0.2, edgecolor="k")  # 20% transparency
+        # # Plot the Earth (scaled sphere)
+        # u, v = np.mgrid[0:2*np.pi:100j, 0:np.pi:50j]
+        # earth_x = 3185 * np.cos(u) * np.sin(v)  # Adjusted radius for Earth
+        # earth_y = 3185 * np.sin(u) * np.sin(v)
+        # earth_z = 3185 * np.cos(v)
+        # ax.plot_surface(earth_x, earth_y, earth_z, color="blue", alpha=0.2, edgecolor="k")  # 20% transparency
         
         # Plot the ISS path
         ax.plot3D(x_coords, y_coords, z_coords, color="orange", label="ISS Path", alpha=0.7)  # Slight transparency
@@ -71,7 +71,7 @@ def update(frame):
 # Setup the 3D plot
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
-ani = FuncAnimation(fig, update, interval=5000)  # Update every 15 seconds
+ani = FuncAnimation(fig, update, interval=10000)  # Update every 15 seconds
 
 # Start the live graph
 plt.show()
