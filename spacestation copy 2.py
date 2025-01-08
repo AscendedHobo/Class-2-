@@ -91,6 +91,5 @@ def lat_lon_to_xyz(lat, lon, radius=6371):  # Earth's radius in km
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
 ani = FuncAnimation(fig, update, interval=15000)  # Update every 15 seconds
-
 # Start the live graph
 plt.show()

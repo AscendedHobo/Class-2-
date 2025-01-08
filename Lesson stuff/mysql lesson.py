@@ -4,12 +4,19 @@ mydb = mysql.connector.connect(
     host='localhost',
     user='root',
     password='warcraft91',
-    database= "testDB"
+  database= "testDB"
 )
 
-# mycursor = mydb.cursor()
+mycursor = mydb.cursor()
+mycursor.execute("SELECT * FROM customers")
+myresult = mycursor.fetchall()
+for x in myresult:
+    print(x)
 ###########################################################################################################################################################################
 # mycursor = mydb.cursor()
+
+# mycursor.execute("CREATE TABLE customers (name VARCHAR(255), address VARCHAR(255))")
+
 # sql = "INSERT INTO customers (name, address) VALUES (%s, %s)"
 # val = ("John", "Highway 21")
 # mycursor.execute(sql, val)
@@ -18,17 +25,17 @@ mydb = mysql.connector.connect(
 
 ###########################################################################################################################################################################
 
-mycursor = mydb.cursor()
+# mycursor = mydb.cursor()
 
-# SQL query to delete a record with id = 2
-# sql = "DELETE FROM customers WHERE id = 2"
-sql ="UPDATE customers SET address = 'Canyon 123' WHERE address = 'Valley 345'"
+# # SQL query to delete a record with id = 2
+# # sql = "DELETE FROM customers WHERE id = 2"
+# sql ="UPDATE customers SET address = 'Canyon 123' WHERE address = 'Valley 345'"
 
-mycursor.execute(sql)
-mydb.commit()
+# mycursor.execute(sql)
+# mydb.commit()
 
-# Print the number of records deleted
-print(mycursor.rowcount, "record(s) deleted")
+# # Print the number of records deleted
+# print(mycursor.rowcount, "record(s) deleted")
 
 
 
