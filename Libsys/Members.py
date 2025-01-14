@@ -31,10 +31,6 @@ def remove_member_from_db(member_id):
 
 
 
-
-
-
-
 # Tkinter GUI for Adding or Removing Members
 def manage_members_gui():
     """Create a Tkinter GUI for adding or removing members."""
