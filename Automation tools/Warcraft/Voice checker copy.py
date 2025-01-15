@@ -38,10 +38,6 @@ def filter_text(raw_text):
         if not line.startswith("[Quest:"):
             filtered_lines.append(line)
 
-    # Remove the last line (usually "XXXX Copper")
-    if filtered_lines:
-        filtered_lines = filtered_lines[:-1]
-
     # Include the NPC name at the start, if available
     if npc_name:
         filtered_lines.insert(0, npc_name)
@@ -83,11 +79,15 @@ def is_image_displayed(region, reference_image_path, confidence=0.7):
 # Program execution
 running = False
 alt_gr_pressed = threading.Event()
+shift_alt_gr_pressed = threading.Event()
 
-# Listener for Alt Gr key
+# Listener for Alt Gr key and Shift + Alt Gr
 def on_press(key):
+    global alt_gr_pressed, shift_alt_gr_pressed
     try:
-        if key == keyboard.Key.alt_gr:
+        if key == keyboard.Key.alt_gr and keyboard.Controller().shift_pressed:
+            shift_alt_gr_pressed.set()
+        elif key == keyboard.Key.alt_gr:
             alt_gr_pressed.set()
     except AttributeError:
         pass
@@ -105,6 +105,7 @@ def stop_program():
     global running
     running = False
     alt_gr_pressed.set()  # Ensure any waiting threads proceed
+    shift_alt_gr_pressed.set()  # Ensure any waiting threads proceed
 
     # Stop the listener
     for thread in threading.enumerate():
@@ -115,10 +116,14 @@ def main_loop():
     global running
     text_region = (1584, 341, 664, 654)  # Region of the screen containing the text
     button_region = (1004, 1082, 89, 76)  # Region of the screen containing the button
-    reference_image_path = "path_to_read_aloud_button_image.png"  # Replace with your image path
+    reference_image_path = "C:\\Users\\alanw\\Desktop\\temp region dump\\region_1021x1089_41x38.png"  # Replace with your image path
 
     while running:
         print("Waiting for Alt Gr key press...")
+        if shift_alt_gr_pressed.wait(0.1):
+            shift_alt_gr_pressed.clear()
+            alt_gr_pressed.clear()
+
         alt_gr_pressed.wait()  # Wait for Alt Gr key to start
         alt_gr_pressed.clear()
 
@@ -144,6 +149,12 @@ def main_loop():
         pyautogui.keyUp('alt')
         time.sleep(0.5)
 
+        if shift_alt_gr_pressed.is_set():
+            print("Shift + Alt Gr detected. Switching voice tab...")
+            pyautogui.hotkey('ctrl', 'tab')
+            time.sleep(0.5)
+            shift_alt_gr_pressed.clear()
+
         # Click to select the chat box
         print("Selecting chat box...")
         pyautogui.click(x=1407, y=1243)
@@ -154,7 +165,7 @@ def main_loop():
         time.sleep(0.5)
 
         pyautogui.press('enter')
-        time.sleep(2)
+        time.sleep(4)
 
         # Check if the read aloud button is visible
         print("Checking for read aloud button...")
@@ -163,8 +174,28 @@ def main_loop():
             time.sleep(0.5)  # Retry interval
 
         print("Read aloud button found. Clicking...")
-        pyautogui.click(x=1044, y=1110)
-        time.sleep(1)
+
+        # Retry click logic
+        for attempt in range(3):  # Try clicking up to 3 times
+            pyautogui.click(x=1044, y=1110)
+            time.sleep(0.2)
+            pyautogui.moveTo(500, 500)  # Move cursor away from the region
+            time.sleep(0.5)
+
+            # Check if the region still matches (text hasn't moved)
+            if is_image_displayed(button_region, reference_image_path):
+                print(f"Click attempt {attempt + 1} failed. Retrying...")
+            else:
+                print("Button click succeeded.")
+                break
+        else:
+            print("Failed to click the button after 3 attempts.")
+
+        # If Shift + Alt Gr was pressed, switch back to default tab
+        if shift_alt_gr_pressed.is_set():
+            print("Switching back to default voice tab...")
+            pyautogui.hotkey('ctrl', 'shift', 'tab')
+            time.sleep(0.5)
 
         # Alt-Tab back to the game using key down and up
         print("Switching back to game...")

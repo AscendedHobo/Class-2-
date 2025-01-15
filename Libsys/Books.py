@@ -89,7 +89,6 @@ def manage_books_gui():
     add_button.grid(row=3, column=0, columnspan=2)
 
     # Remove Book Section
-    tk.Label(root, text="Remove Book").grid(row=4, column=0, columnspan=2)
 
     tk.Label(root, text="Book ID").grid(row=5, column=0)
     book_id_entry = tk.Entry(root)
