@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Add Invoice{% endblock %}
+
+{% block content %}
+<form method="POST">
+    <label>Invoice Date:</label>
+    <input type="date" name="invoice_date" required>
+
+    <label>Due Date:</label>
+    <input type="date" name="due_date" required>
+
+    <label>Total Amount:</label>
+    <input type="number" name="total_amount" step="0.01" required>
+
+    <label>User ID:</label>
+    <input type="number" name="user_id" required>
+
+    <!-- Add the Account Selection Dropdown Here -->
+    <label>Account:</label>
+    <select name="account_id" required>
+        {% for account in accounts %}
+            <option value="{{ account.AccountID }}">{{ account.AccountName }}</option>
+        {% endfor %}
+    </select>
+
+    <button type="submit">Create Invoice</button>
+</form>
+
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}Edit User{% endblock %}
+
+{% block content %}
+    <h2>Edit User</h2>
+    <form method="POST">
+        <!-- Input field for user's name -->
+        <label>Name:</label>
+        <input type="text" name="name" value="{{ user.Name }}" required>
+        
+        <!-- Input field for user's email -->
+        <label>Email:</label>
+        <input type="email" name="email" value="{{ user.Email }}" required>
+        
+        <!-- Dropdown menu for selecting user role -->
+        <label>Role:</label>
+        <select name="role">
+            <!-- Preselects the current role of the user -->
+            <option value="Admin" {% if user.Role == 'Admin' %}selected{% endif %}>Admin</option>
+            <option value="Accountant" {% if user.Role == 'Accountant' %}selected{% endif %}>Accountant</option>
+            <option value="Client" {% if user.Role == 'Client' %}selected{% endif %}>Client</option>
+        </select>
+        
+        <!-- Submit button to save changes -->
+        <button type="submit">Save Changes</button>
+    </form>
+    
+    <!-- Link to go back to the list of users -->
+    <a href="{{ url_for('list_users') }}">Back to Users</a>
+{% endblock %}
