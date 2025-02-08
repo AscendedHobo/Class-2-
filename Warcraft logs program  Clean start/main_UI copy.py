@@ -1094,7 +1094,7 @@ class CSVVisualizer:
                 unit_data = pd.concat([source_data, dest_data]).sort_values('timestamp')
                 
                 # Apply death threshold filtering if specified
-                if death_threshold:
+                if death_threshold is not None:
                     valid_events_mask = pd.Series(False, index=unit_data.index)
                     for enc_id in unit_data['encounter id'].unique():
                         enc_data = unit_data[unit_data['encounter id'] == enc_id]
@@ -1151,12 +1151,23 @@ class CSVVisualizer:
                             if len(path_time_grid) > 0:
                                 x_interp = np.interp(path_time_grid, t_dec, x_dec)
                                 y_interp = np.interp(path_time_grid, t_dec, y_dec)
+                                
+                                # Get death sequence for this encounter
+                                death_data = self.df[
+                                    (self.df['encounter id'] == enc_id) & 
+                                    (self.df['event type'] == 'UNIT_DIED')
+                                ]
+                                death_sequence = None
+                                if not death_data.empty:
+                                    death_sequence = death_data['unit died sequence'].iloc[0]
+                                
                                 # Store interpolated values along with their valid time points
                                 interpolated.append({
                                     'coords': np.column_stack((x_interp, y_interp)),
-                                    'times': path_time_grid
+                                    'times': path_time_grid,
+                                    'unit died sequence': death_sequence
                                 })
-                                path_data.append((enc_id, x_dec, y_dec, t_dec))
+                                path_data.append((enc_id, x_dec, y_dec, t_dec, death_sequence))
                     except Exception as e: 
                         print(f"Error interpolating path: {e}")
                         continue
@@ -1167,6 +1178,7 @@ class CSVVisualizer:
                 # Calculate average path and deviations only at time points where we have data
                 all_times = np.unique(np.concatenate([p['times'] for p in interpolated]))
                 avg_path = []
+                avg_times = []
                 deviations = []
                 
                 for t in all_times:
@@ -1180,17 +1192,19 @@ class CSVVisualizer:
                     if positions:
                         positions = np.array(positions)
                         avg_pos = np.mean(positions, axis=0)
-                        avg_path.append(np.concatenate(([t], avg_pos)))
+                        avg_path.append(avg_pos)
+                        avg_times.append(t)
                         # Calculate deviations from average at this time point
                         dev = np.linalg.norm(positions - avg_pos, axis=1)
                         deviations.extend(dev)
                 
                 avg_path = np.array(avg_path)
+                avg_times = np.array(avg_times)
                 std_dev = np.mean(deviations) if deviations else 0
                 variance = np.var(deviations) if deviations else 0
 
                 # Store results
-                results.append((unit, std_dev, variance, avg_path, path_data))
+                results.append((unit, std_dev, variance, avg_path, avg_times, path_data))
 
             if not results:
                 raise ValueError("No valid movement data found")
@@ -1249,12 +1263,12 @@ class CSVVisualizer:
             path_lines = []  # Store path lines for tooltip
 
             # First, plot individual paths for each unit
-            for idx, (unit, std_dev, var_, avg_path, path_data) in enumerate(results):
+            for idx, (unit, std_dev, var_, avg_path, avg_times, path_data) in enumerate(results):
                 color = cmap(idx % 10)
                 info_lines.append(f"{unit}: SD={std_dev:.2f}, Var={var_:.2f}")
                 
                 # Plot individual paths for each encounter
-                for enc_id, x_dec, y_dec, times in path_data:
+                for enc_id, x_dec, y_dec, times, death_sequence in path_data:
                     # Plot path with gradient and arrows
                     lc, arrows = self.plot_path_with_gradient(
                         ax, x_dec, y_dec,
@@ -1271,7 +1285,8 @@ class CSVVisualizer:
                             'unit': unit,
                             'enc_id': enc_id,
                             'times': times,
-                            'coords': np.column_stack((x_dec, y_dec))
+                            'coords': np.column_stack((x_dec, y_dec)),
+                            'unit died sequence': death_sequence
                         })
                 
                 # Plot average path
@@ -1284,6 +1299,7 @@ class CSVVisualizer:
                     if len(x_avg_dec) >= 2:
                         lc, arrows = self.plot_path_with_gradient(
                             ax, x_avg_dec, y_avg_dec,
+                            times=avg_times,  # Pass the times for the average path
                             cmap=plt.cm.coolwarm,
                             arrow_spacing=10
                         )
@@ -1297,8 +1313,9 @@ class CSVVisualizer:
                                 'arrows': arrows,
                                 'unit': unit,
                                 'enc_id': 'Average',
-                                'times': np.linspace(min_time, max_time, len(x_avg_dec)),
-                                'coords': np.column_stack((x_avg_dec, y_avg_dec))
+                                'times': avg_times,
+                                'coords': np.column_stack((x_avg_dec, y_avg_dec)),
+                                'unit died sequence': None
                             })
 
             # Add statistics text
@@ -1496,6 +1513,10 @@ class CSVVisualizer:
                                 tooltip_text = f"Unit: {path_info['unit']}\n"
                                 tooltip_text += f"Encounter: {path_info['enc_id']}\n"
                                 tooltip_text += f"Time: {path_info['times'][time_idx]:.1f}s"
+                                
+                                # Add death sequence if available
+                                if 'unit died sequence' in path_info and path_info['unit died sequence'] is not None:
+                                    tooltip_text += f"\nDeath Sequence: {path_info['unit died sequence']}"
                                 
                                 tooltip.set_text(tooltip_text)
                                 tooltip.xy = point
@@ -1741,21 +1762,25 @@ class CSVVisualizer:
                 }
                 
                 # Save rotation step if plot window exists and has the step entry
-                if hasattr(self, 'plot_window') and self.plot_window:
-                    for widget in self.plot_window.winfo_children():
-                        if isinstance(widget, ttk.Frame):
-                            for child in widget.winfo_children():
-                                if isinstance(child, ttk.LabelFrame) and child.winfo_children():
-                                    for frame in child.winfo_children():
-                                        if isinstance(frame, ttk.Frame):
-                                            for entry in frame.winfo_children():
-                                                if isinstance(entry, ttk.Entry) and entry.winfo_width() == 8:
-                                                    try:
-                                                        step = float(entry.get())
-                                                        settings['rotation_step'] = str(step)
-                                                        break
-                                                    except ValueError:
-                                                        pass
+                if hasattr(self, 'plot_window') and self.plot_window and self.plot_window.winfo_exists():
+                    try:
+                        # Find the rotation step entry in the map controls
+                        for widget in self.plot_window.winfo_children():
+                            if isinstance(widget, ttk.Frame):  # Legend frame
+                                for child in widget.winfo_children():
+                                    if isinstance(child, ttk.LabelFrame) and child.winfo_children():  # Map controls frame
+                                        for frame in child.winfo_children():
+                                            if isinstance(frame, ttk.Frame):  # Rotation frame
+                                                for entry in frame.winfo_children():
+                                                    if isinstance(entry, ttk.Entry) and entry.winfo_width() == 8:
+                                                        try:
+                                                            step = float(entry.get())
+                                                            settings['rotation_step'] = str(step)
+                                                            break
+                                                        except (ValueError, TypeError):
+                                                            continue
+                    except Exception as e:
+                        print(f"Warning: Could not save rotation step: {e}")
                 
                 with open(file_path, 'w') as f:
                     for key, value in settings.items():
@@ -1763,6 +1788,7 @@ class CSVVisualizer:
                 messagebox.showinfo("Success", "Map settings saved successfully!")
         except Exception as e:
             messagebox.showerror("Error", f"Failed to save settings:\n{str(e)}")
+            print(f"Detailed error: {e}")  # Print detailed error for debugging
 
     def load_map_settings(self):
         """Load map settings from a file"""

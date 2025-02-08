@@ -368,9 +368,14 @@ class CSVVisualizer:
 
         btn_frame = ttk.Frame(filter_frame)
         btn_frame.pack(side=tk.LEFT, padx=10)
-        ttk.Button(btn_frame, text="Scatter", command=lambda: self.plot_data('scatter')).pack(side=tk.LEFT)
-        ttk.Button(btn_frame, text="Heatmap", command=lambda: self.plot_data('heatmap')).pack(side=tk.LEFT)
-        ttk.Button(btn_frame, text="Average Movement", command=self.prompt_average_movement).pack(side=tk.LEFT)
+        ttk.Button(btn_frame, text="Scatter", command=lambda: self.plot_data('scatter')).pack(side=tk.TOP, fill=tk.X, pady=2)
+        
+        heatmap_frame = ttk.Frame(btn_frame)
+        heatmap_frame.pack(side=tk.TOP, fill=tk.X, pady=2)
+        ttk.Button(heatmap_frame, text="Hexbin Heatmap", command=lambda: self.plot_data('hexbin')).pack(side=tk.TOP, fill=tk.X, pady=2)
+        ttk.Button(heatmap_frame, text="Spaital Heatmap", command=lambda: self.plot_data('spaital')).pack(side=tk.TOP, fill=tk.X, pady=2)
+        
+        ttk.Button(btn_frame, text="Average Movement", command=self.prompt_average_movement).pack(side=tk.TOP, fill=tk.X, pady=2)
 
         self.status = ttk.Label(main_frame, text="Ready")
         self.status.pack(fill=tk.X, pady=5)
@@ -611,8 +616,27 @@ class CSVVisualizer:
                 except ValueError:
                     pass
 
+            # Initialize scatter_artists list
+            scatter_artists = []
+
             # Plot the data points
-            if plot_type == 'scatter' and not self.unit_panel.entry.get():
+            if plot_type in ('hexbin', 'spaital'):
+                x_coords = pd.to_numeric(filtered['X coord'], errors='coerce')
+                y_coords = pd.to_numeric(filtered['Y coord'], errors='coerce')
+                valid = x_coords.notna() & y_coords.notna()
+                if valid.sum() == 0:
+                    raise ValueError('No valid coordinates found for heatmap')
+                if plot_type == 'hexbin':
+                    hb = ax.hexbin(x_coords[valid].astype(float), y_coords[valid].astype(float), gridsize=30, cmap='hot', mincnt=1, alpha=0.3, zorder=5)
+                    fig.colorbar(hb, ax=ax)
+                elif plot_type == 'spaital':
+                    sns.kdeplot(x=x_coords[valid].astype(float), y=y_coords[valid].astype(float), fill=True, cmap='hot', alpha=0.3, ax=ax, thresh=0.05)
+                scatter = ax.scatter([], [], alpha=0)
+                scatter.unit_data = filtered[valid].reset_index(drop=True)
+                scatter.x_coords = x_coords[valid].values
+                scatter.y_coords = y_coords[valid].values
+                scatter_artists = [scatter]
+            elif plot_type == 'scatter' and not self.unit_panel.entry.get():
                 # Get unique destination units for color mapping
                 dest_units = filtered['Spell destination'].unique()
                 # Count occurrences of each unit
@@ -621,11 +645,11 @@ class CSVVisualizer:
                 dest_units = sorted(dest_units, key=lambda x: unit_counts[x], reverse=True)
                 colors = self.get_color_palette(len(dest_units))
                 color_map = {unit: colors[i] for i, unit in enumerate(dest_units)}
-                
+
                 x_coords = pd.to_numeric(filtered['X coord'], errors='coerce')
                 y_coords = pd.to_numeric(filtered['Y coord'], errors='coerce')
                 valid = x_coords.notna() & y_coords.notna()
-                
+
                 # Create scatter plots by source
                 scatter_artists = []
                 for unit in dest_units:
@@ -638,14 +662,14 @@ class CSVVisualizer:
                             unit_data['Y coord'].astype(float),
                             color=color_map[unit],
                             alpha=0.8,
-                            label=f"{unit} ({count})",  # Add count to label
+                            label=f"{unit} ({count})",
                             picker=True,
                             zorder=5
                         )
                         scatter_artists.append(scatter)
-                        
+
                         # Store data for tooltips
-                        scatter.unit_data = unit_data.reset_index(drop=True)  # Reset index for proper lookup
+                        scatter.unit_data = unit_data.reset_index(drop=True)
                         scatter.x_coords = unit_data['X coord'].astype(float).values
                         scatter.y_coords = unit_data['Y coord'].astype(float).values
             else:
@@ -658,7 +682,7 @@ class CSVVisualizer:
                         x_coords = pd.to_numeric(enc_data['X coord'], errors='coerce')
                         y_coords = pd.to_numeric(enc_data['Y coord'], errors='coerce')
                         valid = x_coords.notna() & y_coords.notna()
-                        
+
                         scatter = ax.scatter(
                             x_coords[valid],
                             y_coords[valid],
@@ -1762,21 +1786,25 @@ class CSVVisualizer:
                 }
                 
                 # Save rotation step if plot window exists and has the step entry
-                if hasattr(self, 'plot_window') and self.plot_window:
-                    for widget in self.plot_window.winfo_children():
-                        if isinstance(widget, ttk.Frame):
-                            for child in widget.winfo_children():
-                                if isinstance(child, ttk.LabelFrame) and child.winfo_children():
-                                    for frame in child.winfo_children():
-                                        if isinstance(frame, ttk.Frame):
-                                            for entry in frame.winfo_children():
-                                                if isinstance(entry, ttk.Entry) and entry.winfo_width() == 8:
-                                                    try:
-                                                        step = float(entry.get())
-                                                        settings['rotation_step'] = str(step)
-                                                        break
-                                                    except ValueError:
-                                                        pass
+                if hasattr(self, 'plot_window') and self.plot_window and self.plot_window.winfo_exists():
+                    try:
+                        # Find the rotation step entry in the map controls
+                        for widget in self.plot_window.winfo_children():
+                            if isinstance(widget, ttk.Frame):  # Legend frame
+                                for child in widget.winfo_children():
+                                    if isinstance(child, ttk.LabelFrame) and child.winfo_children():  # Map controls frame
+                                        for frame in child.winfo_children():
+                                            if isinstance(frame, ttk.Frame):  # Rotation frame
+                                                for entry in frame.winfo_children():
+                                                    if isinstance(entry, ttk.Entry) and entry.winfo_width() == 8:
+                                                        try:
+                                                            step = float(entry.get())
+                                                            settings['rotation_step'] = str(step)
+                                                            break
+                                                        except (ValueError, TypeError):
+                                                            continue
+                    except Exception as e:
+                        print(f"Warning: Could not save rotation step: {e}")
                 
                 with open(file_path, 'w') as f:
                     for key, value in settings.items():
@@ -1784,6 +1812,7 @@ class CSVVisualizer:
                 messagebox.showinfo("Success", "Map settings saved successfully!")
         except Exception as e:
             messagebox.showerror("Error", f"Failed to save settings:\n{str(e)}")
+            print(f"Detailed error: {e}")  # Print detailed error for debugging
 
     def load_map_settings(self):
         """Load map settings from a file"""
