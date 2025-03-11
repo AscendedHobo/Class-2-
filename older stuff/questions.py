@@ -4,7 +4,9 @@
 # Write a Python program that prints the integers between 1000 and 3000
 # that are divisible by both 7 and 13.
 
-
+text = "hello world"
+print(text[0:5])
+print(text[6:11])
 # #####################
 # Exercise 2
 # #####################
